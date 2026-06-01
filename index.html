@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Management Quiz: Parts 1-4</title>
+    <style>
+        :root {
+            --bg: #f1f5f9;
+            --header-bg: #0f172a;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Sticky Header */
+        header {
+            position: sticky;
+            top: 0;
+            background-color: var(--header-bg);
+            color: white;
+            padding: 1rem;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-display {
+            font-weight: 700;
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .shuffle-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .shuffle-btn:active { transform: scale(0.95); }
+
+        /* Quiz Container */
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .quiz-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus { border-color: var(--primary); }
+
+        .check-btn {
+            background-color: var(--header-bg);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .check-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 700;
+            display: none;
+        }
+
+        .correct { background-color: #d1fae5; color: var(--success); display: block; }
+        .incorrect { background-color: #fee2e2; color: var(--error); display: block; }
+
+        @media (max-width: 600px) {
+            .input-area { flex-direction: column; }
+            .header-content { flex-direction: column; gap: 10px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <h1>Server Quiz (Part 1-4)</h1>
+        <div class="score-display">Score: <span id="score">0</span> / <span id="total">0</span></div>
+        <button class="shuffle-btn" onclick="renderQuiz(true)">Shuffle Questions</button>
+    </div>
+</header>
+
+<div class="container" id="quiz-container">
+    <!-- Questions injected here -->
+</div>
+
+<script>
+    // PART 1-4 QUESTION DATA
+    const questions = [
+        // PART 1
+        { q: "A computer or system that provides resources, services, or data to other computers (clients) over a network.", a: ["Server"] },
+        { q: "Specific name for a server used primarily for storing files for students.", a: ["File Server"] },
+        { q: "Specific name for a server used for hosting a website.", a: ["Web Server"] },
+
+        // PART 2
+        { q: "A server that stores and manages files for users.", a: ["File Server"] },
+        { q: "A server that manages printers and print jobs.", a: ["Print Server"] },
+        { q: "A server that hosts websites and web applications.", a: ["Web Server"] },
+        { q: "A server that stores and manages databases.", a: ["Database Server"] },
+        { q: "A server that handles email sending and receiving.", a: ["Mail Server"] },
+        { q: "A server that runs software applications.", a: ["Application Server"] },
+        { q: "A server that converts domain names into IP addresses.", a: ["DNS Server", "DNS", "Domain Name System Server"] },
+        { q: "A server that automatically assigns IP addresses to devices.", a: ["DHCP Server", "DHCP", "Dynamic Host Configuration Protocol Server"] },
+
+        // PART 3
+        { q: "In the client-server model, this component provides services and resources.", a: ["Server"] },
+        { q: "In the client-server model, this component requests services.", a: ["Client"] },
+        { q: "A characteristic where resources and data security are controlled through the server.", a: ["Centralized", "Centralized Control"] },
+        { q: "The ability of a network where any or all elements can be replaced individually as needs increase.", a: ["Scalability"] },
+        { q: "The characteristic that allows new technology to be easily integrated.", a: ["Flexibility"] },
+        { q: "The characteristic where all components (client/network/server) work together.", a: ["Interoperability"] },
+        { q: "The characteristic where a server can be accessed remotely and across multiple platforms.", a: ["Accessibility"] },
+        { q: "A disadvantage of client-server networks involving the high cost of starting the network.", a: ["Initial investment", "Expense", "Initial expense"] },
+        { q: "A disadvantage where operations cease across the network if the server goes down.", a: ["Dependence", "Server dependence"] },
+        { q: "A network created when two or more PCs are connected and share resources without a separate server.", a: ["Peer-to-Peer Network", "P2P Network", "P2P", "Peer to Peer"] },
+        { q: "The main advantage of a P2P network.", a: ["Less initial expense", "No dedicated server needed", "Less expense"] },
+        { q: "A disadvantage of P2P networks where there is no central repository for files.", a: ["Decentralized"] },
+
+        // PART 4
+        { q: "An operating system designed to manage network resources and allow multiple computers to communicate.", a: ["Network Operating System", "NOS"] },
+        { q: "Give one example of a Network Operating System (NOS).", a: ["Windows Server", "Linux", "Ubuntu Server", "CentOS", "UNIX"] },
+        { q: "The NOS function involving managing accounts and access permissions.", a: ["User management"] },
+        { q: "The NOS function that allows shared access to hardware for printing and data storage.", a: ["File and printer sharing"] },
+        { q: "The NOS function that provides services like DNS and DHCP.", a: ["Network services"] }
+    ];
+
+    let currentScore = 0;
+    const totalQuestions = questions.length;
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function renderQuiz(shouldShuffle = false) {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        currentScore = 0;
+        document.getElementById('score').innerText = '0';
+        document.getElementById('total').innerText = totalQuestions;
+
+        const quizPool = shouldShuffle ? shuffle([...questions]) : [...questions];
+
+        quizPool.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'quiz-card';
+            card.innerHTML = `
+                <div class="question-text">${index + 1}. ${item.q}</div>
+                <div class="input-area">
+                    <input type="text" id="input-${index}" placeholder="Type your answer..." autocomplete="off">
+                    <button class="check-btn" id="btn-${index}" onclick="checkAnswer(${index}, ${JSON.stringify(item.a).replace(/"/g, '&quot;')})">Check</button>
+                </div>
+                <div class="feedback" id="feedback-${index}"></div>
+            `;
+            container.appendChild(card);
+
+            // Handle Enter Key
+            const input = card.querySelector('input');
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') document.getElementById(`btn-${index}`).click();
+            });
+        });
+    }
+
+    function checkAnswer(id, correctAnswers) {
+        const input = document.getElementById(`input-${id}`);
+        const btn = document.getElementById(`btn-${id}`);
+        const feedback = document.getElementById(`feedback-${id}`);
+        const userVal = input.value.trim().toLowerCase();
+
+        if (userVal === "") return;
+
+        const isCorrect = correctAnswers.some(ans => ans.toLowerCase() === userVal);
+
+        input.disabled = true;
+        btn.disabled = true;
+
+        if (isCorrect) {
+            feedback.innerText = "Correct!";
+            feedback.className = "feedback correct";
+            currentScore++;
+            document.getElementById('score').innerText = currentScore;
+        } else {
+            feedback.innerText = `Incorrect. Correct answer: ${correctAnswers[0]}`;
+            feedback.className = "feedback incorrect";
+        }
+    }
+
+    // Initial Load
+    window.onload = () => renderQuiz(false);
+</script>
+
+</body>
+</html>
